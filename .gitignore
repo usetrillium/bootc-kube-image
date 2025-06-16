@@ -1,0 +1,23 @@
+# Build artifacts
+images/
+*.iso
+*.qcow2
+images/bootiso/*
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# IDE-specific files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Local configuration files (if any)
+.env

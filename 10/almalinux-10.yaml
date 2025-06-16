@@ -1,0 +1,46 @@
+releasever: 10
+
+repos:
+  - baseos
+  - appstream
+
+variables:
+  distro: "almalinux10"
+
+packages:
+  - almalinux-repos
+  - audit
+  - ca-certificates
+  - conntrack-tools
+  - chrony
+  - jq
+  - python3-pip
+  - socat
+  - sysstat
+
+postprocess:
+  - |
+    #!/usr/bin/env bash
+
+    set -euo pipefail
+
+    mkdir -p /usr/lib/bootc/install/
+    cat > /usr/lib/bootc/install/20-rhel.toml << EOF
+    [install]
+    root-fs-type = "xfs"
+    EOF
+  - |
+    #!/usr/bin/env bash
+    set -euo pipefail
+    dnf clean all
+    rm /var/{log,cache,lib}/* -rf
+    systemctl preset-all
+  - |
+    #!/usr/bin/env bash
+    set -euo pipefail
+    useradd cascade
+    usermod -aG wheel cascade
+    echo "cascade:password" | chpasswd
+
+include:
+  - standard/manifest.yaml
