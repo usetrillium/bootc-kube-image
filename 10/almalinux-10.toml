@@ -1,5 +1,14 @@
 # Minimal TOML configuration for bootc-image-builder (with systemd masking)
 
+# Ensure target directories exist for customizations
+[[customizations.directories]]
+path = "/etc/modules-load.d"
+mode = "0755"
+
+[[customizations.directories]]
+path = "/etc/sysctl.d"
+mode = "0755"
+
 # Load required kernel modules on boot
 [[customizations.files]]
 path = "/etc/modules-load.d/kubernetes.conf"

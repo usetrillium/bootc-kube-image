@@ -1,0 +1,9 @@
+version = 2
+
+imports = ["/etc/containerd/conf.d/*.toml"]
+
+[plugins]
+  [plugins."io.containerd.grpc.v1.cri"]
+    sandbox_image = "__PAUSE_IMAGE_PLACEHOLDER__"
+  [plugins."io.containerd.grpc.v1.cri".registry]
+    config_path = "/etc/containerd/certs.d"

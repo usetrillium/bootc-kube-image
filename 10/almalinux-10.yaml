@@ -9,6 +9,8 @@ variables:
 
 packages:
   - almalinux-repos
+  - rng-tools
+  - libseccomp
   - audit
   - ca-certificates
   - conntrack-tools
@@ -17,6 +19,7 @@ packages:
   - python3-pip
   - socat
   - sysstat
+  - nftables
 
 postprocess:
   - |

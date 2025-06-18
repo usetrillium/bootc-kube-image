@@ -1,0 +1,7 @@
+[kubernetes]
+name=kubernetes
+description=the kubernetes yum repo
+baseurl=https://pkgs.k8s.io/core:/stable:/v__K8S_STABLE_VERSION_PLACEHOLDER__/rpm/
+gpgcheck=1
+gpgkey=https://pkgs.k8s.io/core:/stable:/v__K8S_STABLE_VERSION_PLACEHOLDER__/rpm/repodata/repomd.xml.key
+enabled=1

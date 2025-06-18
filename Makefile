@@ -9,8 +9,13 @@ LABELS ?=
 KUBE_VERSION          ?= 1.33.1
 CONTAINERD_VERSION    ?= 2.1.2
 CONTAINERD_SHA256     ?= 87c18b2686f38ee6f738492d04fc849f80567b7849d0710ee9d19fac3454adc4
-CNI_PLUGINS_VERSION   ?= v1.7.1
+CNI_PLUGINS_VERSION   ?= v1.5.1
 CNI_PLUGINS_SHA256    ?= 1a28a0506bfe5bcdc981caf1a49eeab7e72da8321f1119b7be85f22621013098
+
+# Pause Image Configuration
+PAUSE_IMAGE_REPO ?= registry.k8s.io/pause
+PAUSE_IMAGE_TAG ?= 3.10
+PAUSE_IMAGE := $(PAUSE_IMAGE_REPO):$(PAUSE_IMAGE_TAG)
 
 # Derived image name for Kubernetes layer
 IMAGE_KUBERNETES_NAME = $(IMAGE_NAME)-kube
@@ -43,6 +48,7 @@ image-kubernetes: image # Depends on the base image 'localhost/almalinux-bootc:l
 		--build-arg CONTAINERD_VERSION=$(CONTAINERD_VERSION) \
 		--build-arg CONTAINERD_SHA256=$(CONTAINERD_SHA256) \
 		--build-arg CNI_PLUGINS_VERSION=$(CNI_PLUGINS_VERSION) \
+		--build-arg PAUSE_IMAGE=$(PAUSE_IMAGE) \
 		--build-arg CNI_PLUGINS_SHA256=$(CNI_PLUGINS_SHA256) \
 		--build-arg TARGETARCH=$(shell echo $(PLATFORM) | cut -d/ -f2) \
 		$(LABELS) \

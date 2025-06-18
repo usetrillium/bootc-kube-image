@@ -13,29 +13,25 @@ ARG KUBE_VERSION
 ARG CONTAINERD_VERSION
 ARG CNI_PLUGINS_VERSION
 ARG TARGETARCH
+ARG PAUSE_IMAGE
+
+COPY 10/kubernetes/etc/ /etc/
+
+# Replace placeholder in containerd config
+RUN sed -i "s|__PAUSE_IMAGE_PLACEHOLDER__|${PAUSE_IMAGE}|g" /etc/containerd/config.toml
 
 # 1. Set up repositories
-# Kubernetes repository
-RUN echo "DEBUG: KUBE_VERSION=${KUBE_VERSION}" && \
-    K8S_STABLE_VERSION=$(echo "${KUBE_VERSION}" | sed 's/\.[^.]*$//') && \
-    echo "DEBUG: K8S_STABLE_VERSION=${K8S_STABLE_VERSION}" && \
-    echo "[kubernetes]" > /etc/yum.repos.d/kubernetes.repo && \
-    echo "name=Kubernetes" >> /etc/yum.repos.d/kubernetes.repo && \
-    echo "baseurl=https://pkgs.k8s.io/core:/stable:/v${K8S_STABLE_VERSION}/rpm/" >> /etc/yum.repos.d/kubernetes.repo && \
-    echo "enabled=1" >> /etc/yum.repos.d/kubernetes.repo && \
-    echo "gpgcheck=1" >> /etc/yum.repos.d/kubernetes.repo && \
-    echo "gpgkey=https://pkgs.k8s.io/core:/stable:/v${K8S_STABLE_VERSION}/rpm/repodata/repomd.xml.key" >> /etc/yum.repos.d/kubernetes.repo && \
-    echo "DEBUG: Contents of /etc/yum.repos.d/kubernetes.repo:" && \
+# Substitute K8S_STABLE_VERSION in the copied kubernetes.repo file
+RUN K8S_STABLE_VERSION=$(echo "${KUBE_VERSION}" | sed 's/\([0-9]*\.[0-9]*\)\..*/\1/') && \
+    echo "DEBUG: KUBE_VERSION=${KUBE_VERSION}, K8S_STABLE_VERSION=${K8S_STABLE_VERSION}" && \
+    sed -i "s|__K8S_STABLE_VERSION_PLACEHOLDER__|${K8S_STABLE_VERSION}|g" /etc/yum.repos.d/kubernetes.repo && \
     cat /etc/yum.repos.d/kubernetes.repo
-    # GPG key will be imported by dnf during package installation
 
-RUN dnf search kubelet
 # Containerd repository (Docker's repository)
 RUN dnf install -y dnf-utils && \
     dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo && \
-    echo "INFO: Forcing Docker CE repo to use CentOS 9 channel for AlmaLinux 10 compatibility" && \
-    sed -i 's/$releasever/9/' /etc/yum.repos.d/docker-ce.repo && \
-    echo "INFO: Updated /etc/yum.repos.d/docker-ce.repo content:" && \
+    echo "INFO: Forcing Docker CE repo to use CentOS 10 channel for AlmaLinux 10 compatibility" && \
+    sed -i 's/$releasever/10/' /etc/yum.repos.d/docker-ce.repo && \
     cat /etc/yum.repos.d/docker-ce.repo
 
 # 2. Install packages
@@ -48,3 +44,6 @@ RUN dnf install -y \
     kubernetes-cni \
     --disableexcludes=kubernetes && \
     dnf clean all
+
+# Remove cni directories as we will create them later
+RUN rm -rf /opt/cni/ && rm -rf /etc/cni
