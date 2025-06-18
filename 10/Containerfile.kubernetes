@@ -45,5 +45,18 @@ RUN dnf install -y \
     --disableexcludes=kubernetes && \
     dnf clean all
 
-# Remove cni directories as we will create them later
-RUN rm -rf /opt/cni/ && rm -rf /etc/cni
+# Remove cni directories as we will create them later (if they were created by kubernetes-cni RPM)
+RUN rm -rf /opt/cni/bin/* && rm -rf /etc/cni/net.d/* # Clear out potential RPM-installed CNI files before manual install
+
+# 3. Install CNI Plugins manually
+RUN CNI_TARBALL="cni-plugins-linux-${TARGETARCH}-${CNI_PLUGINS_VERSION}.tgz" && \
+    CNI_DOWNLOAD_URL="https://github.com/containernetworking/plugins/releases/download/${CNI_PLUGINS_VERSION}/${CNI_TARBALL}" && \
+    echo "Downloading CNI plugins from ${CNI_DOWNLOAD_URL}" && \
+    mkdir -p /opt/cni/bin /tmp && \
+    curl -sSL "${CNI_DOWNLOAD_URL}" -o "/tmp/${CNI_TARBALL}" && \
+    echo "Verifying CNI plugins checksum..." && \
+    echo "${CNI_PLUGINS_SHA256}  /tmp/${CNI_TARBALL}" | sha256sum -c - && \
+    echo "Extracting CNI plugins to /opt/cni/bin/" && \
+    tar -xzf "/tmp/${CNI_TARBALL}" -C /opt/cni/bin/ && \
+    echo "Cleaning up CNI tarball..." && \
+    rm "/tmp/${CNI_TARBALL}"
