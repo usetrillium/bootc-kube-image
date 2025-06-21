@@ -1,0 +1,5 @@
+packages:
+  - "@Workstation"
+
+include:
+  - standard/base.yaml

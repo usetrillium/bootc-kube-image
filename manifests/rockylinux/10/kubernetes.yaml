@@ -1,0 +1,8 @@
+packages:
+  - kubeadm
+  - kubelet
+  - kubectl
+  - containerd
+
+include:
+  - standard/base.yaml

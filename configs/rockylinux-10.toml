@@ -1,0 +1,7 @@
+name = "rocky 10 desktop os"
+description = "Rocky Linux 10 desktop os"
+version = "10.0"
+distro = "rockylinux-10"
+
+[customizations.disk]
+size = "20GiB"

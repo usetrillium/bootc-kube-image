@@ -1,0 +1,16 @@
+# A base blueprint for a Rocky Linux 10 bootable container image.
+
+name = "base-rocky10"
+description = "A base Rocky Linux 10 bootable container image"
+version = "0.0.1"
+
+[customizations]
+hostname = "rocky10-bootc"
+
+[customizations.timezone]
+timezone = "US/Eastern"
+ntpservers = ["time.nist.gov"]
+
+[customizations.locale]
+languages = ["en_US.UTF-8"]
+keyboard = "us"

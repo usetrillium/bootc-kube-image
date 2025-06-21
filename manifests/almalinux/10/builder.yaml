@@ -1,0 +1,3 @@
+# A minimal manifest to satisfy the bootc-image-builder.
+# The actual image content is taken from the local container,
+# so this file is just a placeholder.

@@ -1,0 +1,17 @@
+# Containerfile for the Rocky Linux 10 Desktop Image
+# This extends the base bootc image.
+
+FROM localhost/almalinux10-bootc:base
+
+# Install the "Workstation" package group for a full desktop environment
+# and ensure the GDM display manager is present.
+RUN dnf groupinstall -y "Workstation" && \
+    dnf install -y gdm && \
+    dnf clean all
+
+# Set the default systemd target to graphical for a desktop environment
+RUN systemctl set-default graphical.target
+
+# Update the image labels
+LABEL org.opencontainers.image.vendor "My Org"
+LABEL org.opencontainers.image.description "AlmaLinux 10 Desktop Bootable Container Image"

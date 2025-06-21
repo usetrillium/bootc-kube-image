@@ -1,100 +1,117 @@
-# AlmaLinux Kubernetes Bootable Container Images (bootc)
+# HPC Bootable Container Images
 
-**<ins>Caution</ins>: Kubernetes bootc images are currently *experimental*. Please use with care and report any issues.**
+> [!WARNING]
+> **This project is highly experimental and under active development. Use at your own risk.**
 
-## Project Overview
-
-This project automates the build of a secure, parameterized AlmaLinux 10 Kubernetes bootable container image using `bootc`. The goal is to produce a bootable ISO installer that can be used to deploy Kubernetes nodes.
-
-The process involves:
-1. Building a base AlmaLinux 10 bootc-enabled container image.
-2. Layering Kubernetes components (kubelet, kubeadm, kubectl) and a container runtime (containerd) onto the base image.
-3. Generating a bootable ISO from the final Kubernetes-enabled container image.
+This repository provides a framework for building bootable OS images (ISOs, QCOW2s) for various Linux distributions using `bootc` and `podman`.
 
 ## Prerequisites
 
-- Podman (or Docker, though Makefile is configured for Podman)
-- Make
-- Internet access (for downloading packages and base images)
-- `sudo` access (for running Podman builds and mounting operations if necessary)
+Ensure you have the following tools installed on your system:
+- `make`
+- `podman`
+- `sudo` (build commands require elevated privileges)
 
-## Directory Structure
+## Project Structure
 
+| Directory | Description |
+|---|---|
+| `builds/` | Output directory for generated ISO and QCOW2 files. |
+| `configs/` | Configuration files (`.toml`) for the `bootc-image-builder`, defining users, passwords, disk size, etc. |
+| `containerfiles/` | `Containerfile` definitions for each image variant. These extend from base images and add specific configurations and packages. |
+| `manifests/` | `imagectl` manifests (`.yaml`) that define the core package sets for the base operating systems. |
+| `overlay/` | Static configuration files that are copied directly into the image filesystem during the build process. |
+
+## Configuration
+
+The primary build configuration is managed through the `Makefile`.
+
+### Kubernetes Version
+
+To build the Kubernetes image with a specific version, edit the `K8S_VERSION` variable in the `Makefile`. The build script automatically handles using the full version for package installation and the major/minor version for the repository URL.
+
+```makefile
+# Makefile
+
+# ...
+K8S_VERSION := 1.33.1
+# ...
 ```
-.
-├── 10/                             # AlmaLinux 10 specific files
-│   ├── Containerfile               # Builds the base AlmaLinux 10 bootc image
-│   ├── Containerfile.kubernetes    # Layers Kubernetes on the base image
-│   ├── almalinux-10.yaml         # Manifest for bootc-base-imagectl (base image)
-│   └── almalinux-10.toml         # Configuration for bootc-image-builder (ISO/disk image)
-├── images/                         # Output directory for generated ISOs/disk images (gitignored)
-├── ansible/                        # Ansible roles and playbooks for configuration (if used)
-├── Makefile                        # Main build orchestration file
-├── README.md                       # This file
-└── .gitignore                      # Specifies intentionally untracked files
+
+## Building Images
+
+All builds are orchestrated through the `Makefile`. Commands must be run from the root of the repository.
+
+### Build All Images
+
+To build all defined container images, ISOs, and QCOW2 files, run:
+
+```bash
+make all
 ```
 
-## Build Instructions
+### Build Individual Container Images
 
-The `Makefile` provides targets to build the images and the final ISO.
+To build a specific container image, use its corresponding target. This is a prerequisite for building bootable media.
 
-### Variables
+- **AlmaLinux 10 Base Image:**
+  ```bash
+  make almalinux10-base
+  ```
 
-The following variables can be overridden when calling `make`:
+- **AlmaLinux 10 Kubernetes Image:**
+  ```bash
+  make almalinux10-kube
+  ```
 
-- `PLATFORM`: Target platform (default: `linux/amd64`).
-- `IMAGE_NAME`: Base name for the bootc image (default: `almalinux-bootc`).
-- `IMAGE_KUBERNETES_NAME`: Name for the Kubernetes layered image (default: `almalinux-bootc-kube`).
-- `VERSION_MAJOR`: Major version of AlmaLinux (default: `10`).
-- `KUBE_VERSION`: Kubernetes version (e.g., `1.33.1`).
-- `CONTAINERD_VERSION`: Containerd version (e.g., `2.1.2`).
-- `CNI_PLUGINS_VERSION`: CNI plugins version (e.g., `v1.7.1`).
-- `DISK_TYPE`: Type of disk image to create with `make disk` (default: `iso`, can be `qcow2`).
-- `DISK_SIZE`: Size of the disk image (default: `10G`).
+### Build Bootable Media (ISO/QCOW2)
 
-Example: `sudo make KUBE_VERSION=1.30.2 disk`
+After building the desired container image, you can generate a bootable ISO or a QCOW2 virtual disk image.
 
-### Targets
+- **AlmaLinux 10 Kubernetes ISO:**
+  ```bash
+  make almalinux10-kube-iso
+  ```
 
-1.  **Build Base AlmaLinux Bootc Image:**
-    ```bash
-    sudo make image
-    ```
-    This creates a container image named `localhost/almalinux-bootc:latest` (or as per `IMAGE_NAME`).
+- **AlmaLinux 10 Kubernetes QCOW2:**
+  ```bash
+  make almalinux10-kube-qcow2
+  ```
 
-2.  **Build Kubernetes Layered Image:**
-    ```bash
-    sudo make image-kubernetes
-    ```
-    This depends on the base image and creates `localhost/almalinux-bootc-kube:latest` (or as per `IMAGE_KUBERNETES_NAME` and `KUBE_VERSION`).
+### Clean Up
 
-3.  **Rechunk the Kubernetes Image (Optional but Recommended for bootc disk images):**
-    The `disk` target depends on `rechunk`, which optimizes the image for `bootc-image-builder`.
-    ```bash
-    sudo make rechunk
-    ```
+To remove all generated images from the local `podman` storage and the `builds/` directory, run:
 
-4.  **Create Bootable Disk Image (ISO or QCOW2):**
-    ```bash
-    sudo make disk
-    ```
-    This will produce an `install.iso` (by default) or `install.qcow2` in the `images/` directory.
-    To specify qcow2: `sudo make disk DISK_TYPE=qcow2`
+```bash
+make clean
+```
 
-## Customization
+This command converts the container image into a bootable `qcow2` file, which can be used directly by virtual machines.
 
--   **Component Versions:** Kubernetes, Containerd, and CNI plugin versions are controlled by variables in the `Makefile`. Modify these variables at the top of the `Makefile` or override them on the command line.
--   **Kickstart Configuration:** The `10/almalinux-10.toml` file contains a Kickstart section (`[customizations.installer.kickstart]`) that defines users, passwords (encrypted recommended), services, partitioning, etc., for the ISO installer. Modify this to suit your needs.
--   **System Configuration:** Additional system files (kernel modules, sysctl params, systemd units/presets) are also managed in `10/almalinux-10.toml` via `[[customizations.files]]` and `[[customizations.directories]]`.
+```bash
+sudo podman run --rm --privileged \
+    --security-opt label=type:unconfined_t \
+    -v ./images:/output \
+    -v ./config.toml:/config.toml:ro \
+    -v /var/lib/containers/storage:/var/lib/containers/storage:z \
+    quay.io/centos-bootc/bootc-image-builder:latest \
+    --type qcow2 \
+    --config /config.toml \
+    --local localhost/almalinux10-bootc:base
+```
 
-## Output
+#### 4. Create a Bootable ISO Installer
 
--   Container Images: Stored in your local Podman/Docker storage (e.g., `localhost/almalinux-bootc:latest`, `localhost/almalinux-bootc-kube:1.33.1`).
--   Disk Image: An `install.iso` or `install.qcow2` file in the `images/` directory.
+This command attempts to create a bootable `iso` installer. This relies on the `bootc-image-builder` having a built-in, working definition for `almalinux-10`.
 
-## Troubleshooting
-
--   **Docker CE Repository 404 Error (AlmaLinux 10):**
-    If you encounter errors fetching `repomd.xml` from `download.docker.com/linux/centos/10.0/...`, it's because Docker doesn't yet provide a CentOS 10 repository. The `10/Containerfile.kubernetes` now includes a step to modify `/etc/yum.repos.d/docker-ce.repo` to use the CentOS 9 channel (`sed -i 's/$releasever/9/' ...`), which is generally compatible for installing `containerd.io`.
--   **bootc-image-builder file copy errors:**
-    If `bootc-image-builder` (run via `make disk`) fails with errors like `cp: cannot create regular file '/run/osbuild/tree/etc/some/path': No such file or directory`, ensure the parent directory (e.g., `/etc/some/`) is explicitly created in `10/almalinux-10.toml` using a `[[customizations.directories]]` block before the `[[customizations.files]]` block that tries to place a file in `path`.
+```bash
+sudo podman run --rm --privileged \
+    --security-opt label=type:unconfined_t \
+    -v ./images:/output \
+    -v ./config.toml:/config.toml:ro \
+    -v /var/lib/containers/storage:/var/lib/containers/storage:z \
+    quay.io/centos-bootc/bootc-image-builder:latest \
+    --type iso \
+    --config /config.toml \
+    --local localhost/almalinux10-bootc:base
+```

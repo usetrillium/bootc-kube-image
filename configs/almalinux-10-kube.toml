@@ -1,0 +1,22 @@
+name = "AlmaLinux 10 Kube OS"
+description = "AlmaLinux 10 with Kubernetes tools"
+version = "10.0"
+distro = "almalinux-10"
+
+[customizations.kernel]
+# name - not yet supported
+append = "transparent_hugepage=madvise"
+
+[customizations.timezone]
+timezone = "US/Eastern"
+ntpservers = ["time.nist.gov"]
+
+[[customizations.user]]
+name = "kubeadmin"
+password = "$6$G6sl3z08/RPvNz8i$XuO9mGtswJijswaw5t8aHK5ffojnaQhloV2ZlldLDrH7TvqI3bzI11i5KwysI2H6t5t/GXpY5OI8H3907gfBp/"
+key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDIKsX/sh1uHzXowSgCxzOMXQJA7+r8aXrHELXdMwmARswd/U6dok4wBAE6VmVYkrzjmC+CVGs8iJVnYPema43zs7+id9BwqS+KYCqz33EJsqRBkKESY+KTQ0fHeszHfPRCu7LBlyKGuTCZplhFTrozG6ZEn9ml4FNxwXYJu5ZOj5jsBR6YGAmp7fEHOWriSyePTcm92MlPcgW5hWpIDWARMfwpBVzgSLVsLb5+w62s+Z49kJVv0V6pq2TwXMrRUJHENK+6XrcQbzgStvAnc3uZ/oG4QjknwnCYc7HbaTsAT9XwRzQk4rO2APnZsB744kAy/toSpizANMKqp/F+n7/2RhUyjGeleITEb+kNrTgNh1Muaq3ztluHs9Ckb3qfdvOua352lllQdyyRCvh4UO5KH4WX/xSwshdHHu7NN7FsyNu1DI8RCJod70TcfVZgX0aJ6zHUG0sfVnwqOCi8qtSrlYbv2sajddGA19e/SGQIL8bgXU85d6qYICszr/jESnCo1fnMLndWVwUB83n9nUO4B15sohEUAtzXoLlyLyLdBhhBlJRLSmdTq4DLdeEEIgldWBCHhbGKvw2MMVBFVD46MbXKt5R9daZCzsk79onZ+HHX8opJy/711mBYKLivwruku+KcI4DgFXNL7jec601yFdLVWkHUDTXrKeOVWsTq5w== anglinb@fedora"
+groups = ["wheel"]
+
+[customizations.services]
+enabled = ["auditd"]
+masked = ["conntrackd"]

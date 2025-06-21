@@ -1,0 +1,7 @@
+name = "almalinux 10 desktop os"
+description = "AlmaLinux 10 desktop os"
+version = "10.0"
+distro = "almalinux-10"
+
+[customizations.disk]
+size = "20GiB"

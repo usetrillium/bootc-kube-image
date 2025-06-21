@@ -1,0 +1,14 @@
+# Common packages for all bootable container images
+packages:
+  - kernel
+  - systemd
+  - systemd-udev
+  - dbus-broker
+  - dnf
+  - openssh-server
+  - policycoreutils
+  - selinux-policy-targeted
+  - ostree
+  - bootc
+  - grub2-efi-x64
+  - shim-x64

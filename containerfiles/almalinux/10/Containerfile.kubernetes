@@ -1,0 +1,40 @@
+# Containerfile for the Rocky Linux 10 Desktop Image
+# This extends the base bootc image.
+
+FROM localhost/almalinux10-bootc:base
+
+# Define build argument for Kubernetes version, default to 1.30
+ARG K8S_VERSION=1.33.1
+ARG K8S_REGISTRY=registry.k8s.io
+ARG PAUSE_IMAGE_VERSION=3.10
+ARG CONTAINERD_CRI_SOCKET=unix:///var/run/containerd/containerd.sock
+
+# Copy all configuration files from the overlay directory
+COPY overlay/ / 
+
+# Configure, install, and clean up in a single layer
+RUN K8S_MAJOR_VERSION=$(echo ${K8S_VERSION} | cut -d. -f1,2) && \
+    sed -i 's/^SELINUX=enforcing$/SELINUX=permissive/' /etc/selinux/config && \
+        sed -i "s/__K8S_STABLE_VERSION_PLACEHOLDER__/${K8S_MAJOR_VERSION}/g" /etc/yum.repos.d/kubernetes.repo && \
+    sed -i "s|{{ kubernetes_container_registry }}|${K8S_REGISTRY}|g" /etc/kubeadm.yml && \
+        sed -i "s/{{ kubernetes_semver }}/v${K8S_VERSION}/g" /etc/kubeadm.yml && \
+    sed -i "s|{{ containerd_cri_socket }}|${CONTAINERD_CRI_SOCKET}|g" /etc/kubeadm.yml && \
+    dnf install -y \
+      epel-release \
+            kubelet-${K8S_VERSION} \
+      kubeadm-${K8S_VERSION} \
+      kubectl-${K8S_VERSION} \
+      containerd.io \
+      --disableexcludes=kubernetes && \
+    sed -i "s|__PAUSE_IMAGE_PLACEHOLDER__|${K8S_REGISTRY}/pause:${PAUSE_IMAGE_VERSION}|g" /etc/containerd/config.toml && \
+    systemctl enable containerd kubelet && \
+        echo "${K8S_VERSION}" > /etc/kubernetes-version
+
+# Generate bash completions
+RUN /usr/bin/kubectl completion bash > /usr/share/bash-completion/completions/kubectl && \
+    /usr/bin/kubeadm completion bash > /usr/share/bash-completion/completions/kubeadm && \
+    /usr/bin/crictl completion bash > /usr/share/bash-completion/completions/crictl
+
+# Update the image labels
+LABEL org.opencontainers.image.vendor "Trillium"
+LABEL org.opencontainers.image.description "AlmaLinux 10 Kubernetes BootC Image"
