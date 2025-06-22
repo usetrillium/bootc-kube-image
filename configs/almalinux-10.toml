@@ -12,14 +12,14 @@ ntpservers = ["time.nist.gov"]
 type       = "plain"
 mountpoint = "/boot/efi"
 fs_type    = "vfat"
-size       = "500 MiB"
+size       = "512 MiB"
 
 # Boot partition
 [[customizations.disk.partitions]]
 type       = "plain"
 mountpoint = "/boot"
 fs_type    = "xfs"
-size       = "500 MiB"
+size       = "512 MiB"
 
 # LVM partition (will become a VG named "sys-vg")
 [[customizations.disk.partitions]]

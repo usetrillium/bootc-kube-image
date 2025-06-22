@@ -10,6 +10,7 @@ variables:
 packages:
   - almalinux-repos
   - open-vm-tools
+  - firewalld
 
 postprocess:
   - |
