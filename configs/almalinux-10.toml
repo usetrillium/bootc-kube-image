@@ -1,7 +1,71 @@
-name = "almalinux 10 base os"
-description = "AlmaLinux 10 base os"
+name = "AlmaLinux 10 Kube OS"
+description = "AlmaLinux 10 with Kubernetes tools"
 version = "10.0"
 distro = "almalinux-10"
 
-[customizations.disk]
-size = "20GiB"
+[customizations.timezone]
+timezone = "US/Eastern"
+ntpservers = ["time.nist.gov"]
+
+# EFI System Partition
+[[customizations.disk.partitions]]
+type       = "plain"
+mountpoint = "/boot/efi"
+fs_type    = "vfat"
+size       = "500 MiB"
+
+# Boot partition
+[[customizations.disk.partitions]]
+type       = "plain"
+mountpoint = "/boot"
+fs_type    = "xfs"
+size       = "500 MiB"
+
+# LVM partition (will become a VG named "sys-vg")
+[[customizations.disk.partitions]]
+type    = "lvm"
+name    = "sys-vg"      # this names the VG
+minsize = "100 GiB"
+
+# now define the LVs in that VG:
+[[customizations.disk.partitions.logical_volumes]]
+name       = "ROOTFS"
+mountpoint = "/"
+fs_type    = "xfs"
+minsize    = "20 GiB"
+
+[[customizations.disk.partitions.logical_volumes]]
+name       = "VARFS"
+mountpoint = "/var"
+fs_type    = "xfs"
+minsize    = "20 GiB"
+
+[[customizations.disk.partitions.logical_volumes]]
+name       = "VARLOGFS"
+mountpoint = "/var/log"
+fs_type    = "xfs"
+minsize    = "4 GiB"
+
+[[customizations.disk.partitions.logical_volumes]]
+name       = "VARLOGAUDITFS"
+mountpoint = "/var/log/audit"
+fs_type    = "xfs"
+minsize    = "10 GiB"
+
+[[customizations.disk.partitions.logical_volumes]]
+name       = "HOMEFS"
+mountpoint = "/home"
+fs_type    = "xfs"
+minsize    = "1 GiB"
+
+[[customizations.disk.partitions.logical_volumes]]
+name       = "TMPFS"
+mountpoint = "/tmp"
+fs_type    = "xfs"
+minsize    = "8 GiB"
+
+[[customizations.disk.partitions.logical_volumes]]
+name       = "VARTMPFS"
+mountpoint = "/var/tmp"
+fs_type    = "xfs"
+minsize    = "8 GiB"

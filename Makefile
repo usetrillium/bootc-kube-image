@@ -14,10 +14,10 @@ PAUSE_IMAGE_VERSION := 3.10
 CONTAINERD_CRI_SOCKET := /var/run/containerd/containerd.sock
 
 # Config files
-ROCKY10_CONFIG := ./configs/rockylinux-10.toml
-ALMALINUX10_CONFIG := ./configs/almalinux-10.toml
-ALMALINUX10_DESKTOP_CONFIG := ./configs/almalinux-10-desktop.toml
-ALMALINUX10_KUBE_CONFIG := ./configs/almalinux-10-kube.toml
+ROCKY10_BLUEPRINT := ./configs/rockylinux-10.toml
+ALMALINUX10_BLUEPRINT := ./configs/almalinux-10.toml
+ALMALINUX10_DESKTOP_BLUEPRINT := ./configs/almalinux-10-desktop.toml
+ALMALINUX10_KUBE_BLUEPRINT := ./configs/almalinux-10-kube.toml
 
 # Directories
 OUTPUT_DIR := ./images
@@ -103,7 +103,7 @@ almalinux10-kube-qcow2: almalinux10-kube-rechunk
 	sudo podman run --rm --privileged \
 		--security-opt label=type:unconfined_t \
 		-v $(OUTPUT_DIR):/output \
-		-v $(ALMALINUX10_KUBE_CONFIG):/config.toml:ro \
+		-v $(ALMALINUX10_KUBE_BLUEPRINT):/config.toml:ro \
 		-v /var/lib/containers/storage:/var/lib/containers/storage:z \
 		quay.io/centos-bootc/bootc-image-builder:latest \
 		--type qcow2 \
@@ -115,7 +115,7 @@ almalinux10-desktop-qcow2: almalinux10-desktop-rechunk
 	sudo podman run --rm --privileged \
 		--security-opt label=type:unconfined_t \
 		-v $(OUTPUT_DIR):/output \
-		-v $(ALMALINUX10_DESKTOP_CONFIG):/config.toml:ro \
+		-v $(ALMALINUX10_DESKTOP_BLUEPRINT):/config.toml:ro \
 		-v /var/lib/containers/storage:/var/lib/containers/storage:z \
 		quay.io/centos-bootc/bootc-image-builder:latest \
 		--type qcow2 \
@@ -127,7 +127,7 @@ rocky10-desktop-qcow2: rocky10-desktop-rechunk
 	sudo podman run --rm --privileged \
 		--security-opt label=type:unconfined_t \
 		-v $(OUTPUT_DIR):/output \
-		-v $(ROCKY10_CONFIG):/config.toml:ro \
+		-v $(ROCKY10_BLUEPRINT):/config.toml:ro \
 		-v /var/lib/containers/storage:/var/lib/containers/storage:z \
 		quay.io/centos-bootc/bootc-image-builder:latest \
 		--type qcow2 \
@@ -139,7 +139,7 @@ almalinux10-base-qcow2: almalinux10-base
 	sudo podman run --rm --privileged \
 		--security-opt label=type:unconfined_t \
 		-v $(OUTPUT_DIR):/output \
-		-v $(ALMALINUX10_CONFIG):/config.toml:ro \
+		-v $(ALMALINUX10_BLUEPRINT):/config.toml:ro \
 		-v /var/lib/containers/storage:/var/lib/containers/storage:z \
 		quay.io/centos-bootc/bootc-image-builder:latest \
 		--type qcow2 \
@@ -153,7 +153,7 @@ almalinux10-kube-iso: almalinux10-kube-rechunk
 	sudo podman run --rm --privileged \
 		--security-opt label=type:unconfined_t \
 		-v $(OUTPUT_DIR):/output \
-		-v $(ALMALINUX10_KUBE_CONFIG):/config.toml:ro \
+		-v $(ALMALINUX10_KUBE_BLUEPRINT):/config.toml:ro \
 		-v /var/lib/containers/storage:/var/lib/containers/storage:z \
 		quay.io/centos-bootc/bootc-image-builder:latest \
 		--type iso \
@@ -166,7 +166,7 @@ almalinux10-desktop-iso: almalinux10-desktop-rechunk
 	sudo podman run --rm --privileged \
 		--security-opt label=type:unconfined_t \
 		-v $(OUTPUT_DIR):/output \
-		-v $(ALMALINUX10_DESKTOP_CONFIG):/config.toml:ro \
+		-v $(ALMALINUX10_DESKTOP_BLUEPRINT):/config.toml:ro \
 		-v /var/lib/containers/storage:/var/lib/containers/storage:z \
 		quay.io/centos-bootc/bootc-image-builder:latest \
 		--type iso \
@@ -192,7 +192,7 @@ almalinux10-base-iso: almalinux10-base
 	sudo podman run --rm --privileged \
 		--security-opt label=type:unconfined_t \
 		-v $(OUTPUT_DIR):/output \
-		-v $(ALMALINUX10_CONFIG):/config.toml:ro \
+		-v $(ALMALINUX10_BLUEPRINT):/config.toml:ro \
 		-v /var/lib/containers/storage:/var/lib/containers/storage:z \
 		quay.io/centos-bootc/bootc-image-builder:latest \
 		--type iso \

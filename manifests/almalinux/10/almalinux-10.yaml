@@ -9,6 +9,7 @@ variables:
 
 packages:
   - almalinux-repos
+  - open-vm-tools
 
 postprocess:
   - |
