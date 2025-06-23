@@ -1,0 +1,18 @@
+[Unit]
+Description=Bind mount for writable Kubelet plugins directory
+# This ensures the underlying filesystems are ready before we try to mount.
+After=local-fs.target
+
+[Mount]
+# The "real" writable directory in /var
+What=/var/lib/kubelet-plugins
+
+# The target read-only path in /usr
+Where=/usr/libexec/kubernetes/kubelet-plugins
+
+# Mount options
+Type=none
+Options=bind
+
+[Install]
+WantedBy=local-fs.target

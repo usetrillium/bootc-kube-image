@@ -15,7 +15,7 @@ COPY overlay/ /
 # Configure, install, and clean up
 RUN K8S_MAJOR_VERSION=$(echo ${K8S_VERSION} | cut -d. -f1,2) && \
     sed -i 's/^SELINUX=enforcing$/SELINUX=permissive/' /etc/selinux/config && \
-    sed -i "s/__K8S_STABLE_VERSION_PLACEHOLDER__/${K8S_MAJOR_VERSION}/g" /etc/yum.repos.d/kubernetes.repo && \
+    sed -i "s/{{ kubernetes_stable_version }}/${K8S_MAJOR_VERSION}/g" /etc/yum.repos.d/kubernetes.repo && \
     sed -i "s|{{ kubernetes_container_registry }}|${K8S_REGISTRY}|g" /etc/kubeadm.yml && \
     sed -i "s/{{ kubernetes_semver }}/v${K8S_VERSION}/g" /etc/kubeadm.yml && \
     sed -i "s|{{ containerd_cri_socket }}|${CONTAINERD_CRI_SOCKET}|g" /etc/kubeadm.yml
@@ -31,6 +31,12 @@ RUN dnf install -y \
 RUN sed -i "s|__PAUSE_IMAGE_PLACEHOLDER__|${K8S_REGISTRY}/pause:${PAUSE_IMAGE_VERSION}|g" /etc/containerd/config.toml && \
     systemctl enable containerd kubelet && \
     echo "${K8S_VERSION}" > /etc/kubernetes-version
+
+# Create writable kubelet plugins directory and enable mount since /usr is read-only.
+# We create both the source and destination directories to ensure the mount unit
+# never fails because a path is missing.
+RUN mkdir -p /usr/libexec/kubernetes/kubelet-plugins && \
+    systemctl enable usr-libexec-kubernetes-kubelet-plugins.mount
 
 # Generate bash completions
 RUN /usr/bin/kubectl completion bash > /usr/share/bash-completion/completions/kubectl && \

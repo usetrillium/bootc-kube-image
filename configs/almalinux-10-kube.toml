@@ -35,8 +35,8 @@ network  --bootproto=dhcp --device=link --activate --onboot=on
 # Disk partitioning information
 zerombr
 clearpart --all --initlabel --disklabel=gpt --drives=sda
-part /boot/efi --fstype="efi" --size=500 --label="EFIFS"
-part /boot --fstype="xfs" --size=500 --label="BOOTFS"
+part /boot/efi --fstype="efi" --size=512 --label="EFIFS"
+part /boot --fstype="xfs" --size=512 --label="BOOTFS"
 part pv.01 --fstype="lvmpv" --grow --size=1
 
 volgroup sysvg pv.01
@@ -45,13 +45,20 @@ logvol /          --vgname=sysvg --name=ROOTFS        --size=20480 --fstype=xfs
 logvol /var       --vgname=sysvg --name=VARFS         --size=20480 --fstype=xfs 
 logvol /var/log   --vgname=sysvg --name=VARLOGFS      --size=4096  --fstype=xfs 
 logvol /var/log/audit --vgname=sysvg --name=VARLOGAUDITFS --size=10240 --fstype=xfs 
-logvol /home      --vgname=sysvg --name=HOMEFS        --size=1024  --fstype=xfs 
+logvol /home      --vgname=sysvg --name=HOMEFS        --size=8192  --fstype=xfs
 logvol /tmp       --vgname=sysvg --name=TMPFS         --size=8192  --fstype=xfs
 logvol /var/tmp   --vgname=sysvg --name=VARTMPFS      --size=8192  --fstype=xfs
 
 # User configuration for the installer
-user --name=kubeadmin --groups=wheel --password="$6$pubJxDw2EWMDmvva$q9nwd6wDhazD0pkX63IuBXLMThHNnEGkwLFzLYNjaEoVwzPvt4jEV1KNm9lua44OY3.sSgKv75.hqtKfFLNv//" --iscrypted
+pwchange kubeadmin --password="$6$pubJxDw2EWMDmvva$q9nwd6wDhazD0pkX63IuBXLMThHNnEGkwLFzLYNjaEoVwzPvt4jEV1KNm9lua44OY3.sSgKv75.hqtKfFLNv//" --iscrypted
 
 # Reboot after installation
 reboot
+
+%post --log=/var/log/ks-post.log
+# Create the source directory for the kubelet plugins bind mount
+# This must be done in %post because the /var filesystem is created fresh
+# during installation.
+mkdir -p /var/lib/kubelet-plugins
+%end
 """
